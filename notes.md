@@ -35,8 +35,20 @@ SN      0       number of multiallelic SNP sites:       0
 #Remove duplicate entries by chr, pos, ref and alt:
 [kiranmayee.bakshy@assembler2 filtration]$ module load htslib samtools bcftools
 [kiranmayee.bakshy@assembler2 filtration]$ /home/kiranmayee.bakshy/vcflib/bin/vcfuniq f1.vcf.gz | bgzip > f2.vcf.gz
-[kiranmayee.bakshy@assembler2 filtration]$ bcftools stats f1.vcf.gz | grep -P "SN\t"
+[kiranmayee.bakshy@assembler2 filtration]$ bcftools stats f2.vcf.gz | grep -P "SN\t"
+# SN    [2]id   [3]key  [4]value
+SN      0       number of samples:      172
+SN      0       number of records:      17156523
+SN      0       number of no-ALTs:      0
+SN      0       number of SNPs: 17156523
+SN      0       number of MNPs: 0
+SN      0       number of indels:       0
+SN      0       number of others:       0
+SN      0       number of multiallelic sites:   0
+SN      0       number of multiallelic SNP sites:       0
 
+
+[kiranmayee.bakshy@assembler2 filtration]$ bcftools view -g hom -S umds_matched_animals.txt -x --force-samples -Oz -o f3.vcf.gz f2.vcf.gz
 
 
 
