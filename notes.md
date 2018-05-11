@@ -48,7 +48,7 @@ SN      0       number of multiallelic sites:   0
 SN      0       number of multiallelic SNP sites:       0
 ```
 
-## Select only homozygous variants:
+## Step 2: Select only homozygous variants:
 ```bash
 # Select just homozygous variant genotypes 
 [kiranmayee.bakshy@assembler2 filtration]$ ~/vcflib/bin/vcffilter -g "GT = 1/1" f2.vcf.gz | bgzip > f3v1.vcf.gz
@@ -63,8 +63,11 @@ It is taking a lot of time...
 # Generate summary stats
 [kiranmayee.bakshy@assembler2 filtration]$ bcftools stats -v -s - -F /mnt/nfs/nfs2/Genomes/umd3_kary_unmask_ngap.fa --af-bins '(0.05,0.1,0.5,1)' f3v3.vcf.gz > f3v3.stats
 [kiranmayee.bakshy@assembler2 filtration]$ plot-vcfstats -r -p f3v3 f3v3.stats
+```
 
-# Selecting variants within the CDDR sequenced samples and excluding the variants with > 10% missing genotypes  
+## Step 3: Selecting variants within the CDDR sequenced samples
+```bash
+# Excluding the variants with > 10% missing genotypes 
 [kiranmayee.bakshy@assembler2 filtration]$ bcftools view -S NAAB_samples_overlap.txt f2.vcf.gz | bcftools filter -i "F_MISSING<0.1" | bgzip -c > f3.vcf.gz && tabix f3.vcf.gz
 
 # Selecting variants with high quality, QUAL >= 999, conform to HWEP,  0.05 > MAF < 0.50 and no read bias (RPB > 0.99)
@@ -73,6 +76,7 @@ It is taking a lot of time...
 # Merge above 2 steps
 [kiranmayee.bakshy@assembler2 filtration]$ bcftools view -S NAAB_samples_overlap.txt f2.vcf.gz | bcftools filter -i "F_MISSING<0.1 & QUAL>=999 & MAF>0.05 & MAF<0.5 & RPB>0.90" | bgzip -c > f4.vcf.gz && tabix f4.vcf.gz
 
+```
 
 
 
