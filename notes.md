@@ -75,21 +75,42 @@ It is taking a lot of time...
 
 # Merge above 2 steps 
 [kiranmayee.bakshy@assembler2 filtration]$ bcftools view -S NAAB_samples_overlap.txt f2.vcf.gz | bcftools filter -i "F_MISSING<0.1 & QUAL>=999 & MAF>0.05 & MAF<0.5 & RPB>0.90" | bgzip -c > f4.vcf.gz && tabix f4.vcf.gz
+
+# Run concordance of f3v3.vcf.gz and f2.vcf.gz
+GenomeAnalysisTK -T SelectVariants -R /mnt/nfs/nfs1/derek.bickhart/CDDR-Project/vcfs/condensed_vcfs/liftover/test_files/umd3_kary_unmask_ngap.fa -V f2.vcf.gz -conc f3v3.vcf.gz -o f2_f3v3_con.vcf
+## only 1 variant added
 ```
+
 ## Step 4: Selecting homozygous variants
 ```bash
-# method to call the sites that are all homozygous Variants (1/1, 2/2 genotype)
-GenomeAnalysisTK -T SelectVariants -R /mnt/nfs/nfs1/derek.bickhart/CDDR-Project/vcfs/condensed_vcfs/liftover/test_files/umd3_kary_unmask_ngap.fa -V f2.vcf.gz -o f_gt_1.vcf -select 'vc.getHomVarCount() == 6'
-## outcome: no sites will have ambigous (./.) and/or homRef (0/0). All other homVar are allowed
-
 # select vcf sites where no sample has hetVar (no Gt = 0/1, 0/2), and at least one sample is HomVar (GT = 1/1)
 GenomeAnalysisTK -T SelectVariants -R /mnt/nfs/nfs1/derek.bickhart/CDDR-Project/vcfs/condensed_vcfs/liftover/test_files/umd3_kary_unmask_ngap.fa -V f2.vcf.gz -o f_gt_2.vcf -select 'vc.getHetCount() == 0 && vc.getHomVarCount() >= 1'
+## the above command included these GTs: 1/1, 0/0 and ./.
+
+# select vcf sites where no sample has hetVar (no Gt = 0/1, 0/2), and at least one sample (in 147 samples) is HomVar (GT = 1/1) and < 10% missing GT
+GenomeAnalysisTK -T SelectVariants -R /mnt/nfs/nfs1/derek.bickhart/CDDR-Project/vcfs/condensed_vcfs/liftover/test_files/umd3_kary_unmask_ngap.fa -V f2.vcf.gz -sf NAAB_samples_overlap.args --maxNOCALLfraction 0.1 -o f_gt_3.vcf -select 'vc.getHetCount() == 0 && vc.getHomVarCount() >= 1'
+
+# Now run concordance between the above output and all samples vcf (f2.vcf.gz) to get highly filtered HomoVar set
+GenomeAnalysisTK -T SelectVariants -R /mnt/nfs/nfs1/derek.bickhart/CDDR-Project/vcfs/condensed_vcfs/liftover/test_files/umd3_kary_unmask_ngap.fa -V f2.vcf.gz -conc f_gt_3.vcf -o f2_fgt3_con.vcf 
+## the above file consists of few 0/1 GTs from the rest of the samples (other than 147 selected samples)
+## only 1 variant added
+## But there are a lot of variants with all the samples being homVar (AC=344,AN=344)
+
+# To remove these all-HomoVar
+GenomeAnalysisTK -T SelectVariants -R /mnt/nfs/nfs1/derek.bickhart/CDDR-Project/vcfs/condensed_vcfs/liftover/test_files/umd3_kary_unmask_ngap.fa -V f2_fgt3_con.vcf -o f_gt_4.vcf.gz -select 'vc.getHomVarCount() < 172'
+
+## Only 20365 SNPs left, that's too low...
+
 ```
 
 
 
 ```bash
 Try these later...
+# method to call the sites that are all homozygous Variants (1/1, 2/2 genotype)
+GenomeAnalysisTK -T SelectVariants -R /mnt/nfs/nfs1/derek.bickhart/CDDR-Project/vcfs/condensed_vcfs/liftover/test_files/umd3_kary_unmask_ngap.fa -V f2.vcf.gz -o f_gt_1.vcf -select 'vc.getHomVarCount() == 6'
+## outcome: no sites will have ambigous (./.) and/or homRef (0/0). All other homVar are allowed
+
 # site where at least 1 sample is homVar (GT = 1/1 and/or 2/2 etc.)
 GenomeAnalysisTK -T SelectVariants -R /mnt/nfs/nfs1/derek.bickhart/CDDR-Project/vcfs/condensed_vcfs/liftover/test_files/umd3_kary_unmask_ngap.fa -V f2.vcf.gz -o f_gt_1.vcf -select 'vc.getHomVarCount() >= 1'
 
