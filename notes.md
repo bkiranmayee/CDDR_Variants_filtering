@@ -121,6 +121,5 @@ GenomeAnalysisTK -T SelectVariants -R /mnt/nfs/nfs1/derek.bickhart/CDDR-Project/
 ```
 
 
-
-
+ bcftools view -r chr1:3295844-6492449 -e 'GT[43,47,70,129]="RR" && GT[43,47,70,129]="RA"' f2.vcf.gz | bcftools query -f'%LINE' > test.vcf
 
